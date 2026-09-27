@@ -33,6 +33,9 @@ app.get('/api/health', async (req, res) => {
     })
   }
 })
+app.get('/sayHello',function(req,res){
+  res.send("Terve");
+});
 
 app.use((req, res, next) => {
   const error = new Error('Not found')
