@@ -34,5 +34,5 @@ COPY . .
 # Expose port 3000 to the outside world
 EXPOSE 3000
 
-# Start the application using npm run dev which starts it with nodemon
-CMD ["npm", "run", "dev"]
+# Start the application with Node.js (Compose overrides this for local development)
+CMD ["npm", "start"]

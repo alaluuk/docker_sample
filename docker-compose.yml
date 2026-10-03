@@ -3,8 +3,11 @@
 #
 # Basic Commands:
 # 
-# Build and start all services:
-# docker compose up --build
+# Build and start all services locally (backend uses nodemon):
+# docker compose -f docker-compose.yml -f docker-compose-override.yml up --build
+#
+# Build and start all services in production (backend uses Node.js):
+# docker compose -f docker-compose.yml up -d --build
 #
 # Start services in background:
 # docker compose up -d
@@ -58,13 +61,8 @@ services:
       - .env
     ports:
       - "${BACKEND_EXPOSED_PORT}:${PORT}"
-    volumes:
-      - ./api:/app
-      - /app/node_modules
     environment:
-      - NODE_ENV=development
-      - CHOKIDAR_USEPOLLING=true
-      - CHOKIDAR_INTERVAL=1000
+      - NODE_ENV=production
     depends_on:
       database:
         condition: service_healthy

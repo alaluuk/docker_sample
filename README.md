@@ -204,11 +204,19 @@ The project should now contain both:
 
 Make sure Docker Desktop is running.
 
-Then run:
+For local development, load both Compose files:
 
 ```bash
-docker compose up --build
+docker compose -f docker-compose.yml -f docker-compose-override.yml up --build
 ```
+
+The backend runs `npm run dev` (nodemon). Local API source files are mounted
+into the container, so changes restart the backend automatically. The
+`--legacy-watch` option enables polling for file changes on Docker bind mounts.
+
+The filename `docker-compose-override.yml` is not automatically loaded by
+Docker Compose; include it explicitly with `-f` when developing locally.
+Use the same two `-f` options for subsequent local Compose commands.
 
 The first start may take some time because Docker needs to download images and install dependencies.
 
@@ -220,6 +228,26 @@ Backend:  http://localhost:3000
 Health:   http://localhost:3000/api/health
 ```
 
+### Run the backend in production
+
+On the virtual machine, load only the base Compose file:
+
+```bash
+docker compose -f docker-compose.yml up -d --build
+```
+
+The backend runs `npm start` (`node index.js`) with `NODE_ENV=production`.
+Its source comes from the built image, so source changes require rebuilding
+the backend image. Local source mounts and nodemon are only enabled by the
+development override.
+
+Use only `-f docker-compose.yml` for production logs, status, and stop commands.
+Set `VITE_API_URL` in the virtual machine's `.env` to the backend address
+reachable from the user's browser, for example `http://YOUR_PUBLIC_IP:3000`.
+
+This change separates backend development and production execution. The
+frontend still uses the existing Vite development server in both modes.
+
 ---
 
 ## Check container status
@@ -227,7 +255,7 @@ Health:   http://localhost:3000/api/health
 Open another terminal in the project directory and run:
 
 ```bash
-docker compose ps
+docker compose -f docker-compose.yml -f docker-compose-override.yml ps
 ```
 
 You should see three services:
@@ -281,7 +309,7 @@ Password: root
 Stop and remove the containers:
 
 ```bash
-docker compose down
+docker compose -f docker-compose.yml -f docker-compose-override.yml down
 ```
 
 The PostgreSQL data remains stored in a Docker volume.
@@ -289,7 +317,7 @@ The PostgreSQL data remains stored in a Docker volume.
 To also delete the database volume:
 
 ```bash
-docker compose down -v
+docker compose -f docker-compose.yml -f docker-compose-override.yml down -v
 ```
 
 Be careful: `-v` deletes the database data.
@@ -301,25 +329,25 @@ Be careful: `-v` deletes the database data.
 All services:
 
 ```bash
-docker compose logs
+docker compose -f docker-compose.yml -f docker-compose-override.yml logs
 ```
 
 Backend:
 
 ```bash
-docker compose logs backend
+docker compose -f docker-compose.yml -f docker-compose-override.yml logs backend
 ```
 
 Database:
 
 ```bash
-docker compose logs database
+docker compose -f docker-compose.yml -f docker-compose-override.yml logs database
 ```
 
 Follow logs continuously:
 
 ```bash
-docker compose logs -f
+docker compose -f docker-compose.yml -f docker-compose-override.yml logs -f
 ```
 
 ---
@@ -345,25 +373,25 @@ You should see both Client and Server information.
 Check the status of the services:
 
 ```bash
-docker compose ps
+docker compose -f docker-compose.yml -f docker-compose-override.yml ps
 ```
 
 Then inspect the logs:
 
 ```bash
-docker compose logs
+docker compose -f docker-compose.yml -f docker-compose-override.yml logs
 ```
 
 For example:
 
 ```bash
-docker compose logs backend
+docker compose -f docker-compose.yml -f docker-compose-override.yml logs backend
 ```
 
 or:
 
 ```bash
-docker compose logs database
+docker compose -f docker-compose.yml -f docker-compose-override.yml logs database
 ```
 
 ---
@@ -396,7 +424,7 @@ The exact name depends on the installed PostgreSQL version.
 After that, start the Docker application again:
 
 ```bash
-docker compose up
+docker compose -f docker-compose.yml -f docker-compose-override.yml up
 ```
 
 You can start your local PostgreSQL service again later from the same Services application.
@@ -464,8 +492,8 @@ DB_EXPOSED_PORT=5433
 Then restart the Docker application:
 
 ```bash
-docker compose down
-docker compose up
+docker compose -f docker-compose.yml -f docker-compose-override.yml down
+docker compose -f docker-compose.yml -f docker-compose-override.yml up
 ```
 
 PostgreSQL inside Docker still listens on port:
@@ -509,8 +537,8 @@ because the containers communicate through Docker's internal network.
 To create a fresh database:
 
 ```bash
-docker compose down -v
-docker compose up
+docker compose -f docker-compose.yml -f docker-compose-override.yml down -v
+docker compose -f docker-compose.yml -f docker-compose-override.yml up
 ```
 
 **Warning:** this deletes the existing Docker database data.
